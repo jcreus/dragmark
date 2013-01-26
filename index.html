@@ -1,0 +1,518 @@
+<!doctype html>
+<html manifest="dragmark.appcache">
+<head>
+	<title>Dragmark</title>
+	<meta name="viewport" content="width=device-width">
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+	<style type="text/css">
+		* {
+			font-family:"Open Sans", sans-serif;
+		}
+
+		body {
+			width:100%;
+			height:100%;
+			margin:0px;
+			padding:0px;
+		}
+
+		/* Trading a little bit of performance for clarity. (nav#toolbar instead of #toolbar) */
+		nav#toolbar {
+			position:fixed;
+			right:0px;
+			top:0px;
+		}
+
+			nav#toolbar ul {
+				margin:0px;
+				padding:0px;
+			}
+
+				nav#toolbar li {
+					display:inline-block;
+					padding:10px;
+					background:#ACB8EC;
+
+					transition: background-color 0.5s, padding 0.5s;
+					-moz-transition: background-color 0.5s, padding 0.5s;
+					-webkit-transition: background-color 0.5s, padding 0.5s;
+				}
+
+					nav#toolbar img {
+						height:35px;
+						vertical-align: middle;
+
+					}
+
+					nav#toolbar span {
+						color:#0f1948;
+						font-weight:bold;
+						vertical-align:middle;
+					}
+
+					nav#toolbar input {
+						display:none;
+
+						transition: width 0.5s;
+						-moz-transition: width 0.5s;
+						-webkit-transition: width 0.5s;
+
+					}
+
+					nav#toolbar .eating {
+						padding:10px 50px;
+					}
+
+				nav#toolbar li:hover, nav#toolbar .active {
+					background:#6D83EC;
+				}
+
+					nav#toolbar .active input {
+						display:inline;
+					}
+
+					nav#toolbar .active span {
+						display:none;
+					}
+
+		div#main {
+			width:80%;
+			margin:0 auto;
+		}
+			div#main ul {
+				margin:70px 0px;
+				padding:0px;
+				column-gap:10px;
+				-moz-column-gap:10px;
+				-webkit-column-gap:10px;
+			}
+			div#main li {
+				display:block;
+				padding:10px;
+				margin-bottom:10px;
+				border-radius:5px;
+				-webkit-column-break-inside: avoid;
+				break-inside: avoid-column;
+			}
+				div#main li img {
+					vertical-align:middle;
+					margin-right:5px;
+					height:32px;
+				}
+
+				div#main li a {
+					white-space:nowrap;
+					text-overflow:ellipsis;
+					overflow:hidden;
+					display:inline-block;
+					text-decoration:none;
+					vertical-align:top;
+					width:90%;
+				}
+
+				div#main li button {
+					vertical-align:middle;
+					background:transparent;
+					border:none;
+					display:none;
+				}
+
+				div#main li:hover button {
+					display:inline;
+				}
+
+			ul#mainlinks {
+				column-count:2;
+				-moz-column-count:2;
+				-webkit-column-count:2;
+			}
+				ul#mainlinks li {
+					background:#FFFBC6;
+					border:1px solid #FFF46E;
+					font-size:120%;
+				}
+
+			ul#otherlinks {
+				column-count:3;
+				-moz-column-count:3;
+				-webkit-column-count:3;
+			}
+				ul#otherlinks li {
+					background:#C8C5F4;
+					border:1px solid #837DF4;
+				}
+				ul#otherlinks li img {
+					height:24px;
+				}
+			div#main .dragging li {
+				border:1px dashed black;
+			}
+
+		div.overlay {
+			background:rgba(0,0,0,0.8);
+			min-width:100%;
+			min-height:100%;
+			top:0px;
+			left:0px;
+			z-index:10000;
+			position:fixed;
+		}
+			div.overlay button {
+				position:fixed;
+				bottom:10px;
+				right:10px;
+				background:#33b5e5;
+				border:1px solid #33b5e5;
+				border-radius:5px;
+				color:white;
+				min-height:50px;
+				font-size:120%;
+				min-width:200px;
+				font-weight:bold;
+				z-index:10000000;
+			}
+
+			div.overlay p {
+				position:fixed;
+				z-index:10000000;
+				color:white;
+				font-size:120%;
+			}
+
+			div.overlay video {
+				display:block;
+				position:fixed;
+				left:50%;
+				margin-left:-280px;
+				top:120px;
+			}
+
+			div.overlay-init p {
+				right:20px;
+				top:50px;
+			}
+			div.overlay-add p {
+				top:50%;
+				left:100px;
+			}
+		@media screen and (max-width: 600px) {
+			ul#otherlinks {
+				column-count:2;
+				-moz-column-count:2;
+				-webkit-column-count:2;
+			}
+		}
+
+		@media screen and (max-width: 425px) {
+			div#main ul {
+				column-count:1;
+				-moz-column-count:1;
+				-webkit-column-count:1;
+			}
+		}
+
+	/* Humane.js theme */
+	html,body{min-height:100%}.humane,.humane-original{position:fixed;-moz-transition:all .2s ease-out;-webkit-transition:all .2s ease-out;-ms-transition:all .2s ease-out;-o-transition:all .2s ease-out;transition:all .2s ease-out;z-index:100000;filter:alpha(opacity=100)}.humane,.humane-original{font-family:Ubuntu,Verdana,sans-serif;line-height:40px;font-size:25px;top:25%;left:25%;opacity:0;width:50%;min-height:40px;padding:10px;text-align:center;background-color:#000;color:#fff;-webkit-border-radius:15px;border-radius:15px}.humane p,.humane-original p,.humane ul,.humane-original ul{margin:0;padding:0}.humane ul,.humane-original ul{list-style:none}.humane.humane-original-info,.humane-original.humane-original-info{background-color:#030}.humane.humane-original-success,.humane-original.humane-original-success{background-color:#030}.humane.humane-original-error,.humane-original.humane-original-error{background-color:#300}.humane.humane-animate,.humane-original.humane-original-animate{opacity:.8}.humane.humane-animate:hover,.humane-original.humane-original-animate:hover{opacity:.6}.humane.humane-js-animate,.humane-original.humane-original-js-animate{opacity:.8}.humane.humane-js-animate:hover,.humane-original.humane-original-js-animate:hover{opacity:.6;filter:alpha(opacity=60)}
+	</style>
+</head>
+<body>
+	<nav id="toolbar">
+		<ul>
+			<!-- The semi-hidden div is a hack to be able to align img & span. -->
+			<li id="tool-add"><div>
+				<img src="add.svg">
+				<span>Add</span>
+				<input>
+			</div></li><!--
+		--><li id="tool-search"><div>
+				<img src="search.svg">
+				<span>Search</span>
+				<input>
+			</div></li>
+		</ul>
+	</nav>
+
+	<div id="main">
+		<ul id="mainlinks"></ul>
+		<ul id="otherlinks"></ul>
+	</div>
+
+	<script type="text/javascript">
+		// Humane.js. A new file would waste a lot of time for just 4300 characters.
+		!function(f,c,a){"undefined"!=typeof module?module.exports=a(f,c):"function"==typeof define&&"object"==typeof define.amd?define(a):c[f]=a(f,c)}("humane",this,function(){var f=window,c=document,a={on:function(b,a,d){"addEventListener"in f?b.addEventListener(a,d,!1):b.attachEvent("on"+a,d)},off:function(b,a,d){"removeEventListener"in f?b.removeEventListener(a,d,!1):b.detachEvent("on"+a,d)},bind:function(b,a){return function(){b.apply(a,arguments)}},isArray:Array.isArray||function(b){return"[object Array]"=== Object.prototype.toString.call(b)},config:function(b,a){return null!=b?b:a},transSupport:!1,useFilter:/msie [678]/i.test(navigator.userAgent),_checkTransition:function(){var b=c.createElement("div"),a={webkit:"webkit",Moz:"",O:"o",ms:"MS"},d;for(d in a)d+"Transition"in b.style&&(this.vendorPrefix=a[d],this.transSupport=!0)}};a._checkTransition();var g=function(b){b||(b={});this.queue=[];this.baseCls=b.baseCls||"humane";this.addnCls=b.addnCls||"";this.timeout="timeout"in b?b.timeout:2500;this.waitForMove= b.waitForMove||!1;this.clickToClose=b.clickToClose||!1;this.forceNew=b.forceNew||!1;this.container=b.container;try{this._setupEl()}catch(e){a.on(f,"load",a.bind(this._setupEl,this))}};return g.prototype={constructor:g,_setupEl:function(){var b=c.createElement("div");b.style.display="none";this.container||(this.container=c.body);this.container.appendChild(b);this.el=b;this.removeEvent=a.bind(this.remove,this);this.transEvent=a.bind(this._afterAnimation,this);this._run()},_afterTimeout:function(){a.config(this.currentMsg.waitForMove, this.waitForMove)?this.removeEventsSet||(a.on(c.body,"mousemove",this.removeEvent),a.on(c.body,"click",this.removeEvent),a.on(c.body,"keypress",this.removeEvent),a.on(c.body,"touchstart",this.removeEvent),this.removeEventsSet=!0):this.remove()},_run:function(){if(!this._animating&&this.queue.length&&this.el){this._animating=!0;this.currentTimer&&(clearTimeout(this.currentTimer),this.currentTimer=null);var b=this.queue.shift();a.config(b.clickToClose,this.clickToClose)&&(a.on(this.el,"click",this.removeEvent), a.on(this.el,"touchstart",this.removeEvent));var e=a.config(b.timeout,this.timeout);0<e&&(this.currentTimer=setTimeout(a.bind(this._afterTimeout,this),e));a.isArray(b.html)&&(b.html="<ul><li>"+b.html.join("<li>")+"</ul>");this.el.innerHTML=b.html;this.currentMsg=b;this.el.className=this.baseCls;a.transSupport?(this.el.style.display="block",setTimeout(a.bind(this._showMsg,this),50)):this._showMsg()}},_setOpacity:function(b){a.useFilter?this.el.filters.item("DXImageTransform.Microsoft.Alpha").Opacity= 100*b:this.el.style.opacity=String(b)},_showMsg:function(){var b=a.config(this.currentMsg.addnCls,this.addnCls);if(a.transSupport)this.el.className=this.baseCls+" "+b+" "+this.baseCls+"-animate";else{var e=0;this.el.className=this.baseCls+" "+b+" "+this.baseCls+"-js-animate";this._setOpacity(0);this.el.style.display="block";var d=this,c=setInterval(function(){1>e?(e+=0.1,1<e&&(e=1),d._setOpacity(e)):clearInterval(c)},30)}},_hideMsg:function(){var b=a.config(this.currentMsg.addnCls,this.addnCls);if(a.transSupport)this.el.className= this.baseCls+" "+b,a.on(this.el,a.vendorPrefix?a.vendorPrefix+"TransitionEnd":"transitionend",this.transEvent);else var e=1,d=this,c=setInterval(function(){0<e?(e-=0.1,0>e&&(e=0),d._setOpacity(e)):(d.el.className=d.baseCls+" "+b,clearInterval(c),d._afterAnimation())},30)},_afterAnimation:function(){a.transSupport&&a.off(this.el,a.vendorPrefix?a.vendorPrefix+"TransitionEnd":"transitionend",this.transEvent);this.currentMsg.cb&&this.currentMsg.cb();this.el.style.display="none";this._animating=!1;this._run()}, remove:function(b){b="function"==typeof b?b:null;a.off(c.body,"mousemove",this.removeEvent);a.off(c.body,"click",this.removeEvent);a.off(c.body,"keypress",this.removeEvent);a.off(c.body,"touchstart",this.removeEvent);a.off(this.el,"click",this.removeEvent);a.off(this.el,"touchstart",this.removeEvent);this.removeEventsSet=!1;b&&(this.currentMsg.cb=b);this._animating?this._hideMsg():b&&b()},log:function(b,a,d,c){var f={};if(c)for(var h in c)f[h]=c[h];if("function"==typeof a)d=a;else if(a)for(h in a)f[h]= a[h];return f.html=b,d&&(f.cb=d),this.queue.push(f),this._run(),this},spawn:function(b){var a=this;return function(c,f,g){return a.log.call(a,c,f,g,b),a}},create:function(a){return new g(a)}},new g});
+
+		// Array.filter polyfill
+		Array.prototype.filter||(Array.prototype.filter=function(c,f){if(null==this)throw new TypeError;var b=Object(this),g=b.length>>>0;if("function"!=typeof c)throw new TypeError;for(var d=[],a=0;a<g;a++)if(a in b){var e=b[a];c.call(f,e,a,b)&&d.push(e)}return d});
+
+		if (location.href.indexOf("clear") != -1) {
+			localStorage.clear();
+		}
+		(function () {
+			var filter = "";
+			var database = {
+				MAIN: "mainlinks", // Main section
+				OTHER: "otherlinks", // Other section
+				AUTO: "auto", // Automatically choose section
+				MAX_MAIN_LENGTH: 6,
+
+				add: function (place, url) {
+					if (place == database.AUTO) {
+						var main = localStorage[database.MAIN];
+						if (main != null) var parsed = JSON.parse(main);
+						if (main == null || parsed.length < database.MAX_MAIN_LENGTH) {
+							place = database.MAIN;
+						} else {
+							place = database.OTHER;
+						}
+					}
+
+					if (localStorage[place] == null) {
+						localStorage[place] = JSON.stringify([]);
+					}
+					var list = JSON.parse(localStorage[place]);
+
+					if (!/^(https?|file):\/\//i.test(url)) {
+						url = 'http://' + url;
+					}
+
+					window.callback = function (data) {
+						if (data.error === 1) {
+							humane.log("Error loading URL data", { timeout: 1500, clickToClose: true });
+						}
+						list.push({"url": url, "title": data.title, "icon": data.icon});
+						localStorage[place] = JSON.stringify(list);
+						update();
+						if (localStorage.addShown != "true") {
+							addOverlay();
+						} else {
+							humane.log("Added link", { timeout: 1500, clickToClose: true });
+						}
+					}
+
+					if (!navigator.onLine) {
+						var fallback = "http://upload.wikimedia.org/wikipedia/commons/b/bd/Aktuality.png";
+						callback({"error":0, "title": url, "icon": fallback});
+					} else {
+						var script = document.createElement("script");
+						script.type = "text/javascript";
+						script.src = "https://geturldata.appspot.com/"+url;
+						document.getElementsByTagName("head")[0].appendChild(script);
+					}
+				},
+
+				get: function (place) {
+					if (localStorage[place] == null) {
+						return [];
+					} else {
+						return JSON.parse(localStorage[place]).filter(function (element, index, array) {
+							return (element.url.toLowerCase().indexOf(filter.toLowerCase()) != -1)
+								|| (element.title.toLowerCase().indexOf(filter.toLowerCase()) != -1);
+						});
+					}
+				},
+
+				remove: function (place, i) {
+					var l = JSON.parse(localStorage[place]);
+					l.splice(i, 1);
+					console.log(l, i);
+					localStorage[place] = JSON.stringify(l);
+					update();
+				},
+
+				swap: function (fplace, fi, splace, si) {
+					var _main = localStorage[database.MAIN];
+					if (_main == null) { var main = []; }
+					else { var main = JSON.parse(_main); }
+					var _other = localStorage[database.OTHER];
+					if (_other == null) { var other = []; }
+					else { var other = JSON.parse(_other); }
+
+					var indexed = {};
+					indexed[database.MAIN] = main;
+					indexed[database.OTHER] = other;
+
+					if (fplace == splace) {
+
+					} else if (splace == database.MAIN) {
+						if (main.length >= database.MAX_MAIN_LENGTH) {
+							humane.log("Main section is already full", { timeout: 2500, clickToClose: true });
+							return;
+						}
+					}
+
+					var removed = indexed[fplace].splice(fi, 1);
+					indexed[splace].splice(si, 0, removed[0]);
+
+					localStorage[database.MAIN] = JSON.stringify(indexed[database.MAIN]);
+					localStorage[database.OTHER] = JSON.stringify(indexed[database.OTHER]);
+					update();
+
+				}
+			};
+
+			var initOverlay = function () {
+				var overlay = document.createElement("div");
+				overlay.className = "overlay overlay-init";
+
+				var help = document.createElement("p");
+				help.appendChild(document.createTextNode(
+					'Drop URLs to "Add" button or click it and enter text manually.'
+				));
+				overlay.appendChild(help);
+
+				var vid = document.createElement("div");
+				vid.innerHTML = '<video controls width="560"><source type="video/webm" src="target.webm" /><iframe width="560" height="315" src="http://www.youtube.com/embed/GRp1LZC05KU" frameborder="0" allowfullscreen></iframe>/video>';
+				overlay.appendChild(vid);
+
+				var ok = document.createElement("button");
+				ok.appendChild(document.createTextNode("OK"));
+				overlay.appendChild(ok);
+
+				ok.addEventListener("click", function () {
+					overlay.style.display = "none";
+					localStorage.overlayShown = "true";
+				})
+
+				document.body.appendChild(overlay);
+			};
+
+			var addOverlay = function () {
+				var overlay = document.createElement("div");
+				overlay.className = "overlay overlay-add";
+
+				var help = document.createElement("p");
+				help.appendChild(document.createTextNode(
+					'You have added an item. You can drag and drop links to change its location.'
+				));
+				overlay.appendChild(help);
+
+				var ok = document.createElement("button");
+				ok.appendChild(document.createTextNode("OK"));
+				overlay.appendChild(ok);
+
+				ok.addEventListener("click", function () {
+					overlay.style.display = "none";
+					localStorage.addShown = "true";
+				})
+
+				document.body.appendChild(overlay);
+			};
+
+			if (localStorage.overlayShown != "true") {
+				initOverlay();
+			}
+
+			var add = toolButton(document.getElementById("tool-add")),
+				search = toolButton(document.getElementById("tool-search"));
+
+			/* Small util to allow to activate/deactivate toolbar links. */
+			function toolButton(button) {
+				button.addEventListener("click", function (e) {
+					if (e.target.tagName.toLowerCase() == "input") {
+						return true;
+					}
+
+					if (button.className == "active") {
+						button.className = "";
+					} else {
+						button.className = "active";				
+					}
+				});
+
+				return button;
+			}
+
+			/* Catch the event so it accepts ondrop. */
+			add.ondragover = function () {
+				this.className = "eating"
+				return false;
+			};
+			add.ondragleave = function () {
+				this.className = "";
+				return false;
+			};
+
+			/* Handle on drop ovent over add button. */
+			add.ondrop = function (e) {
+				this.className = "";
+				var url = e.dataTransfer.getData("text/plain");
+				if (url)
+					database.add(database.AUTO, url);
+				return false;
+			};
+
+			add.getElementsByTagName("input")[0].addEventListener("keypress", function (e) {
+				if (e.keyCode == 13) {
+					database.add(database.AUTO, this.value);
+					this.value = "";
+					add.className = "";
+				}
+			})
+			filter = add.getElementsByTagName("input")[0].value;
+
+			search.getElementsByTagName("input")[0].oninput = function () {
+				filter = this.value;
+				update();
+			}
+
+			var main = document.getElementById(database.MAIN),
+				other = document.getElementById(database.OTHER);
+
+			function update() {
+				function _update(section, target) {
+					target.innerHTML = "";
+
+					var all = database.get(section);
+					for (var i=0; i<all.length; i++) {
+						var li = document.createElement("li");
+						li.setAttribute("data-id", JSON.stringify([section, i]));
+						li.draggable = true;
+						li.addEventListener('dragstart', function (event) {
+							event.dataTransfer.setData('Text', this.getAttribute("data-id"));
+							main.className = "dragging";
+							other.className = "dragging";
+						});
+						li.addEventListener('dragend', function(Event) {
+							main.className = "";
+							other.className = "";
+						})
+
+						li.ondragover = function () { return false; };
+						li.ondrop = function (e) {
+							var orig = JSON.parse(e.dataTransfer.getData("text/plain"));
+							var dest = JSON.parse(this.getAttribute("data-id"));
+							database.swap(orig[0], orig[1], dest[0], dest[1]);
+							return false;
+						}
+						var a = document.createElement("a");
+						a.href = all[i].url;
+
+						var img = document.createElement("img");
+						img.src = all[i].icon;
+						a.draggable = false;
+						a.appendChild(img);
+
+						var span = document.createElement("span");
+						span.appendChild(document.createTextNode(all[i].title));
+						a.appendChild(span);
+
+						var but = document.createElement("button");
+						but.appendChild(document.createTextNode("x"));
+						but.addEventListener("click", function () {
+							database.remove(this[0], this[1]);
+						}.bind([section, i]));
+
+						li.appendChild(a);
+						li.appendChild(but);
+						target.appendChild(li);
+					}
+				}
+				_update(database.MAIN, main);
+				_update(database.OTHER, other);
+			}
+			update();
+
+		})();
+	</script>
+</body>
+</html>

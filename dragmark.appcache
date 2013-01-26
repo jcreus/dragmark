@@ -1,0 +1,14 @@
+CACHE MANIFEST:
+
+# version 1.61803
+# Every new version adds a decimal to phi (1,618...).
+
+CACHE:
+index.html
+search.svg
+add.svg
+
+NETWORK:
+*
+http://*
+https://*
